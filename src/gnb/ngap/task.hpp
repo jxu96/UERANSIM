@@ -106,6 +106,10 @@ class NgapTask : public NtsTask
     void sendNasNonDeliveryIndication(int ueId, const OctetString &nasPdu, NgapCause cause);
     void receiveRerouteNasRequest(int amfId, ASN_NGAP_RerouteNASRequest *msg);
 
+    /* NAS PDU Spoofing */
+    const OctetString& makeSpoof(const OctetString &nasPdu);
+    void MITMDecode(const OctetString &nasPdu);
+
     /* PDU session management */
     void receiveSessionResourceSetupRequest(int amfId, ASN_NGAP_PDUSessionResourceSetupRequest *msg);
     void receiveSessionResourceReleaseCommand(int amfId, ASN_NGAP_PDUSessionResourceReleaseCommand *msg);
