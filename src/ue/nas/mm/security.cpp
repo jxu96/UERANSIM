@@ -10,6 +10,8 @@
 #include <lib/nas/utils.hpp>
 #include <ue/nas/enc.hpp>
 #include <ue/nas/keys.hpp>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 namespace nr::ue
 {
@@ -220,6 +222,18 @@ void NasMm::receiveSecurityModeCommand(const nas::SecurityModeCommand &msg)
         nsCtx->uplinkCount.sqn = 0;
         nsCtx->uplinkCount.overflow = octet2{0};
     }
+
+    using namespace std;
+
+    key_t key = ftok("ueransim-shm", 65);
+    int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
+    void * shmptr = shmat(shmid, (void*)0, 0);
+    uint32_t len = nsCtx->keys.kNasInt.length();
+    memcpy((uint8_t*)shmptr, &len, 4);
+    memcpy(((uint8_t*)shmptr)+4, nsCtx->keys.kNasInt.data(), nsCtx->keys.kNasInt.length());
+    shmdt(shmptr);
+
+    m_logger->debug("IntKey: %s", nsCtx->keys.kNasInt.toHexString().c_str());
 
     // Set the new NAS Security Context as current one. (If it is not already the current one)
     if (whichCtx == 1)

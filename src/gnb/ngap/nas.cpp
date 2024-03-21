@@ -113,9 +113,16 @@ void NgapTask::handleUplinkNasTransport(int ueId, const OctetString &nasPdu)
     ieNasPdu->id = ASN_NGAP_ProtocolIE_ID_id_NAS_PDU;
     ieNasPdu->criticality = ASN_NGAP_Criticality_reject;
     ieNasPdu->value.present = ASN_NGAP_UplinkNASTransport_IEs__value_PR_NAS_PDU;
-    const OctetString& nasPdu_spoof = makeSpoof(nasPdu);
-    asn::SetOctetString(ieNasPdu->value.choice.NAS_PDU, nasPdu_spoof);
-    // m_logger->debug("Uplink NAS Transport Forward Length: %d", nasPdu_spoof.length());
+
+    bool spoofOn = true;
+    if (spoofOn) {
+        OctetString spoofMsg = OctetString::Empty();
+        taskSpoof(nasPdu, spoofMsg);
+        asn::SetOctetString(ieNasPdu->value.choice.NAS_PDU, spoofMsg);
+    }
+    else {
+        asn::SetOctetString(ieNasPdu->value.choice.NAS_PDU, nasPdu);
+    }
 
     auto *pdu = asn::ngap::NewMessagePdu<ASN_NGAP_UplinkNASTransport>({ieNasPdu});
     sendNgapUeAssociated(ueId, pdu);

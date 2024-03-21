@@ -1,4 +1,6 @@
-INTERFACE="$1"
+if [ -n "$1" ]; then
+    INTERFACE="$1"
+fi
 
 if [ -z "${INTERFACE}" ]; then
     echo "Undefined Interface."
@@ -23,6 +25,7 @@ echo "Starting nr-ue .."
 sudo bash -c './build/nr-ue -c open5gs-ue.yaml > /dev/null 2>&1 &'
 sleep 1s
 
-kill ${pid_tshark}
 sudo kill $(ps aux | grep nr-ue | awk '{print $2}')
+sleep 2s
 kill ${pid_gnb}
+kill ${pid_tshark}

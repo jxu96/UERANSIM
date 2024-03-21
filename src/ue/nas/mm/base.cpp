@@ -15,6 +15,10 @@
 #include <ue/rrc/task.hpp>
 #include <utils/common.hpp>
 
+// #include <boost/interprocess/managed_shared_memory.hpp>
+// #include <sys/ipc.h>
+// #include <sys/shm.h>
+
 namespace nr::ue
 {
 
@@ -68,14 +72,25 @@ NasMm::NasMm(TaskBase *base, NasTimers *timers) : m_base{base}, m_timers{timers}
 
 void NasMm::onStart(NasSm *sm, Usim *usim)
 {
+    // using namespace boost::interprocess;
     m_sm = sm;
     m_usim = usim;
+
+    // managed_shared_memory segment(open_or_create, "ueransim-shm", 1024);
+    // shptr = segment.allocate(1024);
+
+    // key_t key = ftok("ueransim-shm", 65);
+    // int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
+    // shptr = shmat(shmid, (void*)0, 0);
+
+    // m_logger->debug("%x", shptr);
 
     triggerMmCycle();
 }
 
 void NasMm::onQuit()
 {
+    // shmdt(shptr);
     // TODO
 }
 

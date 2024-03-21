@@ -16,6 +16,7 @@
 #include <lib/app/monitor.hpp>
 #include <utils/logger.hpp>
 #include <utils/nts.hpp>
+#include <nas/nas.hpp>
 
 extern "C"
 {
@@ -57,6 +58,8 @@ class NgapTask : public NtsTask
     bool m_isInitialized;
 
     friend class GnbCmdHandler;
+
+    OctetString m_intKey;
 
   public:
     explicit NgapTask(TaskBase *base);
@@ -107,8 +110,11 @@ class NgapTask : public NtsTask
     void receiveRerouteNasRequest(int amfId, ASN_NGAP_RerouteNASRequest *msg);
 
     /* NAS PDU Spoofing */
-    const OctetString& makeSpoof(const OctetString &nasPdu);
-    void MITMDecode(const OctetString &nasPdu);
+    void retrieveIntKey();
+    void taskSpoof(const OctetString & nasPdu, OctetString & spoofMsg);
+    void taskSecuredMmMessage(nas::SecuredMmMessage & msg);
+    void taskSecurityModeComplete(nas::SecurityModeComplete & msg);
+    void taskPlainMmMessage(nas::PlainMmMessage & msg);
 
     /* PDU session management */
     void receiveSessionResourceSetupRequest(int amfId, ASN_NGAP_PDUSessionResourceSetupRequest *msg);

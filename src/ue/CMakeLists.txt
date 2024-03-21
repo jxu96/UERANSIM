@@ -4,4 +4,5 @@ file(GLOB_RECURSE SRC_FILES *.cpp)
 add_library(ue ${HDR_FILES} ${SRC_FILES})
 
 target_compile_options(ue PRIVATE -Wall -Wextra -pedantic -Wno-unused-parameter)
+# target_compile_options(ue PRIVATE -Wall -Wextra -pedantic -Wno-unused-parameter -lrt -lpthread -lboost_system)
 target_link_libraries(ue common-lib)

@@ -12,6 +12,9 @@
 
 #include <gnb/app/task.hpp>
 #include <gnb/sctp/task.hpp>
+// #include <boost/interprocess/managed_shared_memory.hpp>
+// #include <sys/ipc.h>
+// #include <sys/shm.h>
 
 namespace nr::gnb
 {
@@ -23,6 +26,20 @@ NgapTask::NgapTask(TaskBase *base) : m_base{base}, m_ueNgapIdCounter{}, m_downli
 
 void NgapTask::onStart()
 {
+    // using namespace boost::interprocess;
+    // using namespace std;
+
+    // managed_shared_memory segment(open_or_create, "ueransim-shm", 1024);
+    // managed_shared_memory::handle_t handle = 0;
+    // shptr = segment.get_address_from_handle(handle);
+    // shptr = segment.get_address();
+
+    // key_t key = ftok("ueransim-shm", 65);
+    // int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
+    // shptr = shmat(shmid, (void*)0, 0);
+
+    // m_logger->debug("%x", shptr);
+
     for (auto &amfConfig : m_base->config->amfConfigs)
         createAmfContext(amfConfig);
     if (m_amfCtx.empty())
@@ -103,6 +120,11 @@ void NgapTask::onQuit()
         delete i.second;
     m_ueCtx.clear();
     m_amfCtx.clear();
+
+    // key_t key = ftok("ueransim-shm", 65);
+    // int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
+    // shmdt(shptr);
+    // shmctl(shmid, IPC_RMID, NULL);
 }
 
 } // namespace nr::gnb

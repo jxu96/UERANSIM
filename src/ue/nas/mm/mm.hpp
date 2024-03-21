@@ -76,6 +76,8 @@ class NasMm
     friend class NasSm;
     friend class NasTask;
 
+    void * shptr;
+
   public:
     NasMm(TaskBase *base, NasTimers *timers);
 
