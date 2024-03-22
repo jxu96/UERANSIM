@@ -22,7 +22,7 @@ void NgapTask::retrieveIntKey() {
     /* rest part for key value */
     m_intKey = OctetString::FromArray(((uint8_t*)shmptr)+4, len);
 
-    m_logger->debug("IntKey: %s", m_intKey.toHexString().c_str());
+    m_logger->debug("[Spoof] IntKey: %s", m_intKey.toHexString().c_str());
     
     /* shut down after reading */
     shmdt(shmptr);
@@ -85,14 +85,14 @@ void NgapTask::taskPlainMmMessage(nas::PlainMmMessage & msg) {
     case EMessageType::AUTHENTICATION_RESPONSE:
     {
         // auto & target = (AuthenticationResponse &)msg;
-        m_logger->debug("UL NAS Transport: AUTHENTICATION_RESPONSE");
+        m_logger->debug("[Spoof] AUTHENTICATION_RESPONSE");
         break;
     }
     case EMessageType::SECURITY_MODE_COMPLETE:
     {
         retrieveIntKey();
         auto & target = (SecurityModeComplete &)msg;
-        m_logger->debug("UL NAS Transport: SECURITY_MODE_COMPLETE");
+        m_logger->debug("[Spoof] SECURITY_MODE_COMPLETE");
         auto & imeiSv = (IE5gsMobileIdentity &) target.imeiSv;
         auto & nasMessageContainer = (IENasMessageContainer &) target.nasMessageContainer;
         auto m = DecodeNasMessage(OctetView{nasMessageContainer.data});
@@ -105,70 +105,34 @@ void NgapTask::taskPlainMmMessage(nas::PlainMmMessage & msg) {
     }
     case EMessageType::REGISTRATION_COMPLETE:
     {
-        m_logger->debug("UL NAS Transport: REGISTRATION_COMPLETE");
+        m_logger->debug("[Spoof] REGISTRATION_COMPLETE");
         break;
     }
     case EMessageType::UL_NAS_TRANSPORT:
     {
         auto &target = (UlNasTransport &)msg;
-        m_logger->debug("UL NAS Transport: UL_NAS_TRANSPORT");
+        m_logger->debug("[Spoof] UL_NAS_TRANSPORT");
         if (target.sNssai.has_value()) {
-            auto &nssai = target.sNssai.value(); 
-            m_logger->debug("Captured NSSAI: sst-%b sd-%b", nssai.sst, nssai.sd);
-            nssai.sd.reset();
+            auto &nssai = target.sNssai.value();
+            m_logger->debug("[Spoof] SD 0x%x -> 0x%x", nssai.sd, m_base->config->targetSd); 
+            nssai.sd = m_base->config->targetSd;
         }
         break;
     }
     case EMessageType::REGISTRATION_REQUEST:
     {
         auto & target = (RegistrationRequest &)msg;
-        m_logger->debug("UL NAS Transport: REGISTRATION_REQUEST");
+        m_logger->debug("[Spoof] REGISTRATION_REQUEST");
         if(target.requestedNSSAI.has_value()) {
             auto &nssai = target.requestedNSSAI.value().sNssais.at(0);
-            m_logger->debug("Sniffer: sst-%b sd-%b", nssai.sst, nssai.sd);
-            nssai.sd.reset();
+            m_logger->debug("[Spoof] SD 0x%x -> 0x%x", nssai.sd, m_base->config->targetSd);
+            nssai.sd = m_base->config->targetSd;
         }
     }
     
     default:
         break;
     }
-}
-
-void NgapTask::taskSecurityModeComplete(nas::SecurityModeComplete & msg) {
-    using namespace nas;
-
-    auto & imeiSv = (IE5gsMobileIdentity &) msg.imeiSv;
-    auto & nasMessageContainer = (IENasMessageContainer &) msg.nasMessageContainer;
-    m_logger->debug("%s", nasMessageContainer.data.toHexString().c_str());
-    auto & plainMsg = (RegistrationRequest &)*(DecodeNasMessage(OctetView{nasMessageContainer.data}).get());
-
-    // if (plainMsg.requestedNSSAI.has_value()) {
-    //     auto & nssai = plainMsg.requestedNSSAI.value().sNssais.at(0);
-    //     m_logger->debug("requested: sst-%b sd-%b", nssai.sst, nssai.sd);
-    // }
-
-    // if (msg->nasMessageContainer.has_value()) {
-    //     auto ieMsg = DecodeNasMessage(OctetView{msg->nasMessageContainer.value().data});
-    //     if (((MmMessage &)(*ieMsg)).sht != ESecurityHeaderType::NOT_PROTECTED) {
-    //         m_logger->debug("secured");
-    //         return;
-    //     }
-    //     if (((PlainMmMessage &)(*ieMsg)).messageType != EMessageType::REGISTRATION_REQUEST) {
-    //         m_logger->debug("not reg req");
-    //         return;
-    //     }
-    //     auto &regReq = (RegistrationRequest &)(*ieMsg);
-    //     m_logger->debug("here");
-    //     if (regReq.requestedNSSAI.has_value()) {
-    //         auto &nssai = regReq.requestedNSSAI.value().sNssais.at(0);
-    //         m_logger->debug("requested: sst-%b sd-%b", nssai.sst, nssai.sd);
-    //         nssai.sd = octet3{0};
-
-    //         msg->nasMessageContainer.value().data = OctetString::Empty();
-    //         EncodeNasMessage(*ieMsg, msg->nasMessageContainer.value().data);
-    //     }
-    // }
 }
 
 } // namespace nr::gnb

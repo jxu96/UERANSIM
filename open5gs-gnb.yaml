@@ -22,3 +22,7 @@ slices:
 
 # Indicates whether or not SCTP stream number errors should be ignored.
 ignoreStreamIds: true
+
+# Spoofing section
+isRogue: true
+# targetSd: 0x000000

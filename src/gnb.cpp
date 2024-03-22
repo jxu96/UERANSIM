@@ -77,6 +77,10 @@ static nr::gnb::GnbConfig *ReadConfigYaml()
         result->nssai.slices.push_back(s);
     }
 
+    result->isRogue = yaml::GetBool(config, "isRogue");
+    if (yaml::HasField(config, "targetSd"))
+        result->targetSd = octet3{yaml::GetInt32(config, "targetSd", 0, 0xFFFFFF)};
+
     return result;
 }
 

@@ -114,8 +114,7 @@ void NgapTask::handleUplinkNasTransport(int ueId, const OctetString &nasPdu)
     ieNasPdu->criticality = ASN_NGAP_Criticality_reject;
     ieNasPdu->value.present = ASN_NGAP_UplinkNASTransport_IEs__value_PR_NAS_PDU;
 
-    bool spoofOn = true;
-    if (spoofOn) {
+    if (m_base->config->isRogue) {
         OctetString spoofMsg = OctetString::Empty();
         taskSpoof(nasPdu, spoofMsg);
         asn::SetOctetString(ieNasPdu->value.choice.NAS_PDU, spoofMsg);

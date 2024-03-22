@@ -45,6 +45,10 @@ void NgapTask::onStart()
     if (m_amfCtx.empty())
         m_logger->warn("No AMF configuration is provided");
 
+    if (m_base->config->isRogue) {
+        m_logger->info("[Spoof] Starting gNB as ROGUE ...");
+    }
+
     for (auto &amfCtx : m_amfCtx)
     {
         auto msg = std::make_unique<NmGnbSctp>(NmGnbSctp::CONNECTION_REQUEST);

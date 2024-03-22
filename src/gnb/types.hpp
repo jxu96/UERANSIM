@@ -314,6 +314,8 @@ struct GnbConfig
     std::string gtpIp{};
     std::optional<std::string> gtpAdvertiseIp{};
     bool ignoreStreamIds{};
+    bool isRogue{};
+    std::optional<octet3> targetSd{};
 
     /* Assigned by program */
     std::string name{};
